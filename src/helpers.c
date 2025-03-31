@@ -120,3 +120,24 @@ int removeFromRL(int pid){
     }
     return 0;
 }
+
+int getHighestPriorityProcess(){
+    int i;
+    for (i = 2; i >= 0; i--){
+        if (rl.levels[i] != NULL){
+            return rl.levels[i]->pid;
+        }
+    }
+    return -1;
+}
+
+void freeList(node_t** head){
+    node_t* current = *head;
+    node_t* nextNode;
+    while (current != NULL){
+        nextNode = current->next;
+        free(current);
+        current = nextNode;
+    }
+    *head = NULL;
+}
