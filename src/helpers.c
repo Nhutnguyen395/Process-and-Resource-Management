@@ -1,5 +1,5 @@
-#include "../include/helpers.h"
-#include "../include/shell.h"
+#include "helpers.h"
+#include "shell.h"
 
 extern process_control_block pcb[16];
 extern resource_control_block rcb[4];

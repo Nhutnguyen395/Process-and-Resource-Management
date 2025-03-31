@@ -1,29 +1,18 @@
-# Compiler
-CC = gcc
+CC:=gcc
+CFLAGS:=-g
+SRC_DIR:=src
+BIN_DIR:=bin
+INCLUDE_DIR:=include
 
-# Compiler Flags
-CFLAGS = -Wall -Wextra -g
+all: setup shell
 
-# Source Files
-SRCS = main.c helpers.c shell.c
+shell: src/helpers.c src/shell.c
+	$(CC) -I $(INCLUDE_DIR) $(CFLAGS) $(SRC_DIR)/helpers.c $(SRC_DIR)/shell.c -o $(BIN_DIR)/shell.exe
 
-# Object Files (Replace .c with .o)
-OBJS = $(SRCS:.c=.o)
+setup:
+	@mkdir $(BIN_DIR)
 
-# Executable Name
-TARGET = my_program
-
-# Default Rule: Build Executable
-all: $(TARGET)
-
-# Link Object Files to Create Executable
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
-
-# Compile Source Files into Object Files
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Clean: Remove Object Files and Executable
 clean:
-	rm -f $(OBJS) $(TARGET)
+	-rmdir /s /q $(BIN_DIR)
+
+.PHONY: clean all setup
