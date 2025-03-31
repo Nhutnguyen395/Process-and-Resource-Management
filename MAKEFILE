@@ -1,0 +1,29 @@
+# Compiler
+CC = gcc
+
+# Compiler Flags
+CFLAGS = -Wall -Wextra -g
+
+# Source Files
+SRCS = main.c helpers.c shell.c
+
+# Object Files (Replace .c with .o)
+OBJS = $(SRCS:.c=.o)
+
+# Executable Name
+TARGET = my_program
+
+# Default Rule: Build Executable
+all: $(TARGET)
+
+# Link Object Files to Create Executable
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+
+# Compile Source Files into Object Files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean: Remove Object Files and Executable
+clean:
+	rm -f $(OBJS) $(TARGET)
