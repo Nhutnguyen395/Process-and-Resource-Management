@@ -27,7 +27,7 @@ typedef struct rcb {
 
 typedef struct ready_list_node {
     int pid;
-    struct ready_list* next;
+    struct ready_list_node* next;
 } ready_list_node;
 
 typedef struct ready_list {
