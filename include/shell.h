@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+// process states
+#define READY 1
+#define BLOCKED 0
+#define FREE -1
+
 typedef struct node {
     int id;
     int units;
@@ -35,12 +40,11 @@ typedef struct ready_list {
 } ready_list;
 
 void init();
-int create(int priority);
+int create(int p);
 int destroy(int pid);
 int request(int rid, int units);
 int release(int rid, int units);
 void timeout();
 void scheduler();
-int getRunningProcess();
 
 #endif

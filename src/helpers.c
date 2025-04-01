@@ -121,7 +121,8 @@ int removeFromRL(int pid){
     return 0;
 }
 
-int getHighestPriorityProcess(){
+int getRunningProcess(){
+    // get the highest priority running process
     int i;
     for (i = 2; i >= 0; i--){
         if (rl.levels[i] != NULL){
