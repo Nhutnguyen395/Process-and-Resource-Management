@@ -100,11 +100,44 @@ void scheduler(){
     if (highest_priority_process != -1){
         printf("%s", highest_priority_process);
     }
-
 }
 
 int create(int p){
-    
+    int parent = getRunningProcess();
+    if (parent = -1){
+        return -1;
+    }
+
+    if (p < 0 || p > 2){
+        return -1;
+    }
+
+    int child = -1;
+    int i;
+    for (i = 0; i < 16; i++){
+        if (pcb[i].state == FREE){
+            child = 1;
+            break;
+        }
+    }
+
+    if (child == 1){
+        return -1;
+    }
+
+    pcb[child].state = READY;
+    pcb[child].parent = parent;
+    pcb[child].children = NULL;
+    pcb[child].resources = NULL;
+    pcb[child].priority = p;
+
+    addToList(&pcb[parent].children, child, 0);
+    addToRL(child, p);
+
+    if (p > pcb[parent].priority){
+        scheduler();
+    }
+    return child;
 }
 
 int main() {
