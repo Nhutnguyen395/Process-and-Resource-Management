@@ -144,5 +144,88 @@ void freeList(node_t** head){
 }
 
 int destroyChildren(int pid){
-    return 1;
+    int count = 1;
+
+    // recursively destroy all children
+    node_t* current = pcb[pid].children;
+    while (current != NULL){
+        int cid = current->id;
+        node_t* next_child = current->next;
+        count += destroyChildren(cid);
+        current = next_child;
+    }
+
+    // remove from parent's list
+    if (pcb[pid].parent != -1){
+        removeFromList(&pcb[pcb[pid].parent].children, pid, NULL);
+    }
+
+    // remove from ready list or waitlist
+    if (pcb[pid].state == READY){
+        removeFromRL(pid);
+    } else if (pcb[pid].state == BLOCKED){
+        // if blocked find which resource its blocked on
+        int j;
+        for (j = 0; j < 16; j++){
+            node_t* current = rcb[j].waitlist;
+            node_t* prev = NULL;
+            while (current != NULL){
+                if (current->id == pid){
+                    if (prev == NULL){
+                        rcb[j].waitlist = current->next;
+                    } else {
+                        prev->next = current->next;
+                    }
+                    free(current);
+                    break;
+                }
+                prev = current;
+                current = current->next;
+            }
+        }
+    }
+
+    // release all resources held by the process
+    while (pcb[pid].resources != NULL){
+        int rid = pcb[pid].resources->id;
+        int units = pcb[pid].resources->units;
+        removeFromList(&pcb[pid].resources, rid, NULL);
+        rcb[rid].state += units;
+
+        // checks if process waiting for freed resources can be unblocked
+        node_t* current = rcb[rid].waitlist;
+        node_t* prev = NULL;
+        while(current != NULL && rcb[rid].state > 0){
+            if (rcb[rid].state >= current->units){
+                int waiting_process = current->id;
+                int requested_units = current->units;
+
+                // remove the process from waitlist if resources is free
+                node_t* temp = current;
+                if (prev == NULL){
+                    rcb[rid].waitlist = current->next;
+                    current = current->next;
+                    free(temp);
+                } else {
+                    prev->next = current->next;
+                    current = prev->next;
+                    free(temp);
+                }
+
+                // allocate resources to the process
+                rcb[rid].state -= requested_units;
+                addToList(&pcb[waiting_process].resources, rid, requested_units);
+                pcb[waiting_process].state = READY;
+                addToRL(waiting_process, pcb[waiting_process].priority);
+            } else {
+                prev = current;
+                current = current->next;
+            }
+        }
+    }
+    pcb[pid].state = FREE;
+    pcb[pid].parent = -1;
+    pcb[pid].children = NULL;
+    pcb[pid].resources = NULL;
+    return count;
 }
