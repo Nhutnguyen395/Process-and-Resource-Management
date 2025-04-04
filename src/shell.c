@@ -170,6 +170,10 @@ int destroy(int pid){
     return destroy_children_count;
 }
 
+int request(int rid, int units){
+    
+}
+
 int main() {
     
 }
