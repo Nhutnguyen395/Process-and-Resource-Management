@@ -142,3 +142,7 @@ void freeList(node_t** head){
     }
     *head = NULL;
 }
+
+int destroyChildren(int pid){
+    return 1;
+}

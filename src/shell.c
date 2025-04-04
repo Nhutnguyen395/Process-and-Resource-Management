@@ -140,6 +140,36 @@ int create(int p){
     return child;
 }
 
+int destroy(int pid){
+    int running_process = getRunningProcess();
+    if (running_process == -1){
+        return -1;
+    }
+
+    // check if process exists and is not free
+    if (pid < 0 || pid >= 16 || pcb[pid].state == FREE){
+        return -1;
+    }
+
+    // check if the process is a child of the current running process or is the running process
+    if (pid != running_process && pcb[pid].parent != running_process){
+        return -1;
+    }
+
+    int destroy_children_count = 0;
+    destroy_children_count = destroyChildren(pid);
+
+    if (pid == running_process){
+        scheduler();
+    } else {
+        int highest_priority = getRunningProcess();
+        if (highest_priority != -1 && pcb[highest_priority].priority > pcb[running_process].priority) {
+            scheduler();
+        }
+    }
+    return destroy_children_count;
+}
+
 int main() {
     
 }

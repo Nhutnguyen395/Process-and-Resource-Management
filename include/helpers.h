@@ -11,5 +11,6 @@ void addToRL(int pid, int priority);
 int removeFromRL(int pid);
 void freeList(node_t** head);
 int getRunningProcess();
+int destroyChildren(int pid);
 
 #endif 
