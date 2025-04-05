@@ -171,7 +171,76 @@ int destroy(int pid){
 }
 
 int request(int rid, int units){
-    
+    int pid = getRunningProcess();
+    if (pid == -1){
+        return -1;
+    }
+
+    // resource 0 cannot request for resource
+    if (pid == 0){
+        return -1;
+    }
+
+    // check if units is valid
+    if (units <= 0 || units > rcb[rid].inventory){
+        return -1;
+    }
+
+    // cannot request already holding resource
+    int current_units = 0;
+    if (isInList(pcb[pid].resources, rid, &current_units)){
+        if ((current_units + units) > rcb[rid].inventory){
+            return -1;
+        }
+    }
+
+    // check if resource is available
+    if (rcb[rid].state >= units){
+        // allocate if available
+        rcb[rid].state -= units;
+        if (current_units > 0){
+            node_t* current = pcb[pid].resources;
+            while (current != NULL){
+                if (current->id == rid){
+                    current->units += units;
+                    break;
+                }
+                current = current->next;
+            }
+        } else {
+            addToList(&pcb[pid].resources, rid, units);
+        }
+        return 0;
+    } else {
+        // if resource already allocated then block the process
+        pcb[pid].state = BLOCKED;
+        removeFromRL(pid);
+        // add the process to the waitlist
+        addToList(&rcb[rid].waitlist, pid, units);
+        scheduler();
+        return 0;
+    }
+}
+
+void timeout(){
+    int pid = getRunningProcess();
+    if (pid == -1){
+        return;
+    }
+
+    // remove process from head of the list
+    int i;
+    for (i = 0; i < 3; i++){
+        if (rl.levels[i] != NULL && rl.levels[i]->pid == pid){
+            ready_list_node* temp = rl.levels[i];
+            rl.levels[i] = rl.levels[i]->next;
+            free(temp);
+            break;
+        }
+    }
+    addToRL(pid, pcb[pid].priority);
+
+    scheduler();
 }
 
 int main() {
