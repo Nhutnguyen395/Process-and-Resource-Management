@@ -222,6 +222,89 @@ int request(int rid, int units){
     }
 }
 
+int release(int rid, int units){
+    int pid = getRunningProcess();
+    if (pid == -1){
+        return -1;
+    }
+
+    // check if resource is valid
+    if (rid < 0 || rid >= 4){
+        return -1;
+    }
+
+    // check if the process is holding the resource
+    int holding_units = 0;
+    if (!isInList(pcb[pid].resources, rid, &holding_units)){
+        return -1;
+    }
+
+    // check if units is valid
+    if (units <= 0 || units > holding_units){
+        return -1;
+    }
+
+    // update or remove process from resource's list
+    if (units == holding_units){
+        removeFromList(&pcb[pid].resources, rid, NULL);
+    } else {
+        node_t* current = pcb[pid].resources;
+        while (current != NULL){
+            if (current->id == rid){
+                current->units -= units;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    rcb[rid].state += units;
+
+    // check if any waiting process can be unblocked
+    int scheduler_needed = 0;
+    int highest_priority = -1;
+    node_t* current = rcb[rid].waitlist;
+    node_t* prev = NULL;
+    while (current != NULL && rcb[rid].state > 0){
+        if (rcb[rid].state >= current->units){
+            // if there are enough units then remove the process from waitlist and unblock it
+            int waiting_process = current->id;
+            int requested_units = current->units;
+            if (prev == NULL){
+                rcb[rid].waitlist = current->next;
+                free(current);
+                current = rcb[rid].waitlist;
+            } else {
+                node_t* temp = current;
+                prev->next = current->next;
+                current = prev->next;
+                free(temp);
+            }
+
+            // allocate resources for the process, set it state to ready, and add it to the Ready List 
+            rcb[rid].state -= requested_units;
+            addToList(&pcb[waiting_process].resources, rid, requested_units);
+            pcb[waiting_process].state = READY;
+            addToRL(waiting_process, pcb[waiting_process].priority);
+
+            // check if the process has higher priority than the current running process
+            if (pcb[waiting_process].priority > pcb[pid].priority){
+                scheduler_needed = 1;
+            }
+
+            if (highest_priority == -1 || pcb[waiting_process].priority > pcb[highest_priority].priority) {
+                highest_priority = waiting_process;
+            }
+        } else {
+            prev = current;
+            current = current->next;
+        }
+    }
+    if (scheduler_needed){
+        scheduler();
+    }
+    return 0;
+}
+
 void timeout(){
     int pid = getRunningProcess();
     if (pid == -1){
