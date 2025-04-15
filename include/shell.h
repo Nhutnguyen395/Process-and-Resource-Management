@@ -46,5 +46,6 @@ int request(int rid, int units);
 int release(int rid, int units);
 void timeout();
 void scheduler();
+int prcoessCommand(char* command);
 
 #endif

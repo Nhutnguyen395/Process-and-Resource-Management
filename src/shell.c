@@ -326,6 +326,69 @@ void timeout(){
     scheduler();
 }
 
-int main() {
+int prcoessCommand(char* command){
+    char cmd[10];
+    int arg1, arg2;
+
+    if (sscanf(command, "%s %d %d", cmd, &arg1, &arg2) >= 1){
+        if (strcmp(cmd, "in") == 0){
+            init();
+            return getRunningProcess();
+        } else if (strcmp(cmd, "cr") == 0){
+            if (sscanf(command, "%s %d", cmd, &arg1) != 2 || arg1 < 1 || arg1 > 2){
+                return -1;
+            } else {
+                int result = create(arg1);
+                if (result == -1){
+                    return -1;
+                } else {
+                    return getRunningProcess();
+                }
+            }
+        } else if (strcmp(cmd, "de") == 0){
+            if (sscanf(command, "%s %d", cmd, &arg1) != 2){
+                return -1;
+            } else {
+                int result = destroy(arg1);
+                if (result == -1){
+                    return -1;
+                } else {
+                    return getRunningProcess();
+                }
+            }
+        } else if (strcmp(cmd, "rq") == 0){
+            if (sscanf(command, "%s %d %d", cmd, &arg1, &arg2) != 3){
+                return -1;
+            } else {
+                int result = request(arg1, arg2);
+                if (result == -1){
+                    return -1;
+                } else {
+                    return getRunningProcess();
+                }
+            }
+        } else if (strcmp(cmd, "rl") == 0){
+            if (sscanf(command, "%s %d %d", cmd, &arg1, &arg2) != 3){
+                return -1;
+            } else {
+                int result = release(arg1, arg2);
+                if (result == -1){
+                    return -1;
+                } else {
+                    return getRunningProcess();
+                }
+            }
+        } else if (strcmp(cmd, "to") == 0){
+            timeout();
+            return getRunningProcess();
+        } else {
+            return -1;
+        }
+    } else {
+        return -1;
+    }
+}
+
+int main(int argc, char *argv[]) {
     
 }
