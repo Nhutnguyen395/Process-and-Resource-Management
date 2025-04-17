@@ -390,5 +390,45 @@ int prcoessCommand(char* command){
 }
 
 int main(int argc, char *argv[]) {
+    FILE* input_file;
+    FILE* output_file;
+    char command[100];
+    int newline = 1;
     
+    input_file = fopen(argv[1], "r");
+    if (input_file == NULL){
+        return 1;
+    }
+
+    output_file = fopen(argv[2], "w");
+    if (output_file == NULL){
+        fclose(input_file);
+        return 1;
+    }
+
+    while (fgets(command, sizeof(command), input_file)){
+        command[strcspn(command, "\n")] = 0;
+        if (strlen(command) == 0){
+            continue;
+        }
+
+        if (strncmp(command, "in", 2) == 0 && (command[2] == '\0' || command[2] == ' ')){
+            if (!newline){
+                fprint(output_file, "\n");
+            }
+            newline = 1;
+        }
+
+        int result = processCommand(command);
+
+        if (newline){
+            fprintf(output_file, "%d", result);
+            newline = 0;
+        } else {
+            fprintf(output_file, "%d", result);
+        }
+    }
+
+    fclose(input_file);
+    fclose(output_file);
 }
