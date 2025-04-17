@@ -166,7 +166,7 @@ int destroyChildren(int pid){
     } else if (pcb[pid].state == BLOCKED){
         // if blocked find which resource its blocked on
         int j;
-        for (j = 0; j < 16; j++){
+        for (j = 0; j < 4; j++){
             node_t* current = rcb[j].waitlist;
             node_t* prev = NULL;
             while (current != NULL){
