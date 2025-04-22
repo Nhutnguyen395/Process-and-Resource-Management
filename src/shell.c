@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
         int result = processCommand(command);
 
         if (newline){
-            fprintf(output_file, " %d", result);
+            fprintf(output_file, "%d", result);
             newline = 0;
         } else {
             fprintf(output_file, " %d", result);
